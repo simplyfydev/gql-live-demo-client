@@ -14,15 +14,21 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 
+
+
 // HTTP connection to the GraphQL API
 const httpLink = new HttpLink({
-  uri: 'http://43.205.254.157:4000/graphql',
+  // uri: 'http://43.205.254.157:4000/graphql',
+  uri: 'http://localhost:3030/graphql',
+  // uri: 'http://localhost:4000/graphql',
+
 });
-// http://43.205.254.157:4000/graphql
-// http://presidiumludhiana.in:4000
+
 // Create a WebSocket client for subscriptions
 const wsClient = createClient({
-  url: 'ws://43.205.254.157:4000/graphql',
+  // url: 'ws://43.205.254.157:4000/graphql',
+  url: 'ws://localhost:3030/graphql',
+  // url: 'ws://localhost:4000/graphql',
 });
 
 // Create a WebSocket link
@@ -67,6 +73,8 @@ const TODO_ADDED_SUBSCRIPTION = gql`
   }
 `;
 
+
+
 const App = () => {
   const [todos, setTodos] = useState([]);
   const [todoText, setTodoText] = useState('');
@@ -83,6 +91,8 @@ const App = () => {
     }
   }, [data]);
 
+// console.log({data})
+
   const handleAddTodo = () => {
     if (!todoText.trim()) return; // Prevent adding empty todos
     addTodo({
@@ -95,15 +105,19 @@ const App = () => {
   return (
     <div>
       <h2>Todos:</h2>
+
       <input
         type="text"
         value={todoText}
         onChange={(e) => setTodoText(e.target.value)}
         placeholder="Write a todo"
       />
+
       <button onClick={handleAddTodo} disabled={addingTodo}>
         Add Todo
       </button>
+
+
       {todos.map((todo, index) => (
         <p key={index}>{todo.text}</p>
       ))}
@@ -111,9 +125,13 @@ const App = () => {
   );
 };
 
+
+
 ReactDOM.render(
   <ApolloProvider client={client}>
     <App />
   </ApolloProvider>,
   document.getElementById('root')
 );
+
+
