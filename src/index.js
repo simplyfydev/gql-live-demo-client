@@ -16,12 +16,13 @@ import { createClient } from 'graphql-ws';
 
 // HTTP connection to the GraphQL API
 const httpLink = new HttpLink({
-  uri: 'http://presidiumludhiana.in:4000/graphql',
+  uri: 'http://43.205.254.157:4000/graphql',
 });
+// http://43.205.254.157:4000/graphql
 // http://presidiumludhiana.in:4000
 // Create a WebSocket client for subscriptions
 const wsClient = createClient({
-  url: 'ws://presidiumludhiana.in:4000/graphql',
+  url: 'ws://43.205.254.157:4000/graphql',
 });
 
 // Create a WebSocket link
