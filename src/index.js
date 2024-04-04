@@ -18,18 +18,17 @@ import { createClient } from 'graphql-ws';
 
 // HTTP connection to the GraphQL API
 const httpLink = new HttpLink({
-  // uri: 'http://43.205.254.157:4000/graphql',
-  uri: 'http://localhost:3030/graphql',
-  // uri: 'http://localhost:4000/graphql',
-
+  // uri: 'http://localhost:3030/graphql',
+  uri: 'https://presidiumludhiana.in/graphql',
 });
 
 // Create a WebSocket client for subscriptions
 const wsClient = createClient({
-  // url: 'ws://43.205.254.157:4000/graphql',
-  url: 'ws://localhost:3030/graphql',
-  // url: 'ws://localhost:4000/graphql',
+  // url: 'ws://localhost:3030/graphql',
+  url: 'wss://presidiumludhiana.in/graphql',
 });
+
+
 
 // Create a WebSocket link
 const wsLink = new GraphQLWsLink(wsClient);
@@ -91,7 +90,7 @@ const App = () => {
     }
   }, [data]);
 
-// console.log({data})
+  // console.log({data})
 
   const handleAddTodo = () => {
     if (!todoText.trim()) return; // Prevent adding empty todos
