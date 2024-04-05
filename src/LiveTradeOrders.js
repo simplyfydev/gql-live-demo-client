@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useSubscription, gql } from '@apollo/client';
+import "./trade.css"
 
 const ADD_TRADE_MUTATION = gql`
   mutation AddTrade($type: String!, $shareName: String, $price: Int!, $quantity: Int!) {
@@ -108,47 +109,50 @@ const TradeForm = () => {
 
 
             <h1>Trade Order List </h1>
-            <div style={{ display: "flex" }} >
-
+            <div className="tradeOrdersContainer">
                 <div className='buyOrders'>
-                    <h4>Buy </h4>
-                    {tradeOrders?.buyOrders.map((order, index) =>
-                        <div key={index + 1}>
-                            <div>
-                                <span>{order?.price}</span>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <span>{order?.quantity}</span>
+                    <div className="orderHeader">Buy Orders</div>
+                    {tradeOrders?.buyOrders.map((order, index) => (
+                        <div className="orderCard" key={index}>
+                            <div className="orderBody">
+                                <div className="orderDetail">
+                                    <span className="price">Price: {order?.price}</span>
+                                    <span className="quantity">Quantity: {order?.quantity}</span>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    ))}
                 </div>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
                 <div className='sellOrders'>
-                    <h4>Sell </h4>
-                    {tradeOrders?.sellOrders.map((order, index) =>
-                        <div key={index + 1}>
-                            <div>
-                                <span>{order?.price}</span>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <span>{order?.quantity}</span>
+                    <div className="orderHeader">Sell Orders</div>
+                    {tradeOrders?.sellOrders.map((order, index) => (
+                        <div className="orderCard" key={index}>
+                            <div className="orderBody">
+                                <div className="orderDetail">
+                                    <span className="price">Price: {order?.price}</span>
+                                    <span className="quantity">Quantity: {order?.quantity}</span>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    ))}
                 </div>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
                 <div className='tradeHistory'>
-                    <h4>Histry </h4>
-                    {tradeOrders?.tradeHistory.map((order, index) =>
-                        <div key={index + 1}>
-                            <div>
-                                <span>{order?.price}</span>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <span>{order?.quantity}</span>
+                    <div className="orderHeader">History</div>
+                    {tradeOrders?.tradeHistory.map((order, index) => (
+                        <div className="orderCard" key={index}>
+                            <div className="orderBody">
+                                <div className="orderDetail">
+                                    <span className="price">Price: {order?.price}</span>
+                                    <span className="quantity">Quantity: {order?.quantity}</span>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    ))}
                 </div>
             </div>
+
 
         </>
     );

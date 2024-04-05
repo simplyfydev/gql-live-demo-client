@@ -1,0 +1,40 @@
+.tradeOrdersContainer {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.orderCard {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #f9f9f9;
+    width: 300px;
+    /* Adjust based on your layout */
+}
+
+.orderHeader {
+    background-color: #e2e2e2;
+    color: #333;
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.orderBody {
+    padding: 10px;
+}
+
+.orderDetail {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
+
+.price,
+.quantity {
+    font-weight: bold;
+}
