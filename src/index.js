@@ -13,6 +13,7 @@ import {
 import { getMainDefinition } from '@apollo/client/utilities';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
+import TradeForm from './LiveTradeOrders';
 
 
 
@@ -52,6 +53,8 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+
+
 // GraphQL mutation for adding a todo
 const ADD_TODO_MUTATION = gql`
   mutation addTodo($text: String!) {
@@ -62,7 +65,10 @@ const ADD_TODO_MUTATION = gql`
   }
 `;
 
-// Subscription for listening to new todos
+
+
+
+// Subscription for listening to new todos    
 const TODO_ADDED_SUBSCRIPTION = gql`
   subscription onTodoAdded {
     todoAdded {
@@ -103,6 +109,15 @@ const App = () => {
 
   return (
     <div>
+
+      <div className=''>
+
+        <h2>Limit Trade Order:</h2>
+
+        <TradeForm />
+      </div>
+
+      <br />
       <h2>Todos:</h2>
 
       <input
