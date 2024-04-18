@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useSubscription, gql } from '@apollo/client';
 import "./trade.css"
+import { fetchAllCategories } from '.';
+
+
+
 
 const ADD_TRADE_MUTATION = gql`
-  mutation AddTrade($type: String!, $shareName: String, $price: Int!, $quantity: Int!) {
-    addTrade(type: $type, shareName: $shareName, price: $price, quantity: $quantity) {
+  mutation AddTrade($type: String!, $price: Int!, $quantity: Int!) {
+    addTrade(type: $type, shareName: "CCC", price: $price, quantity: $quantity, coinPairWith:"INR") {
       id
       type
       shareName
@@ -44,15 +48,19 @@ const TRADE_ORDER_UPDATED_SUBSCRIPTION = gql`
 const TradeForm = () => {
 
     const [tradeOrders, setTradeOrders] = useState()
+    const [walletData, setwalletData] = useState([])
 
     const [addTrade] = useMutation(ADD_TRADE_MUTATION);
     const { data: newOrderData } = useSubscription(TRADE_ORDER_UPDATED_SUBSCRIPTION);
     const [tradeForm, setTradeForm] = useState({
         type: '', // 'BUY' or 'SELL'
         shareName: '', // Assuming you want the user to input this as well
-        price: 0,
-        quantity: 0,
+        price: 50,
+        quantity: 10,
     });
+
+
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -65,11 +73,17 @@ const TradeForm = () => {
     const handleAddTrade = (type, price, quantity) => {
         // Perform mutation to add a new trade order
         addTrade({ variables: { type: type, price: price, quantity } });
+        fetchAllCategories().then(({ getWalletDetails }) => {
+            setwalletData(getWalletDetails)
+        })
     };
 
     useEffect(() => {
         // Handle new trade order data
+        // console.log({ newOrderData })
+
         const orders = newOrderData?.tradeOrderUpdated
+
         if (orders) {
             setTradeOrders(orders)
             // console.log('New trade order:', newOrderData?.tradeOrderUpdated);
@@ -78,12 +92,16 @@ const TradeForm = () => {
 
     }, [newOrderData]);
 
-    console.log({ tradeOrders })
+    useEffect(() => {
+        fetchAllCategories().then(({ getWalletDetails }) => {
+            setwalletData(getWalletDetails)
+        })
+    })
+
+    console.log({ walletData })
 
     return (
         <>
-
-
             <div style={{ display: "flex" }}>
                 <div className='tradeForm' style={{ marginRight: '32px' }}>
                     <h4>Buy Trade Order</h4>
@@ -104,6 +122,26 @@ const TradeForm = () => {
                         Add Sell Trade
                     </button>
                 </div>
+
+
+                <div className='wallet data '>
+                    <div >
+                        {walletData.map((vl, index) =>
+                            <>
+                                <div>
+                                    <div style={{ display: "flex" }}>
+                                        <div>{vl?.SK}</div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
+                                        <div><b>{vl?.price}</b></div>
+                                    </div>
+                                    <br />
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+
+
             </div>
 
 
@@ -152,17 +190,9 @@ const TradeForm = () => {
                     ))}
                 </div>
             </div>
-
-
         </>
     );
 };
 
 export default TradeForm;
-
-
-
-
-
-
 

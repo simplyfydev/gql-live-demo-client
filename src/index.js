@@ -14,28 +14,50 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import TradeForm from './LiveTradeOrders';
+import { setContext } from '@apollo/client/link/context';
 
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQSyI6IlVTRVIjMmQ0ZmFhMDAtNWM0OS00Y2Q4LWIyYzMtYjM5MDNjYTVkYjAwIiwiU0siOiJMb2dpbiNVU0VSIzJkNGZhYTAwLTVjNDktNGNkOC1iMmMzLWIzOTAzY2E1ZGIwMCIsImlhdCI6MTcxMzE2MDEwMiwiZXhwIjoxNzE1NzUyMTAyfQ.nb0fH-OsIIPAIM6Hs1UxlUDHcL9tVu4iHx7kph3QCjo"
 
 
 // HTTP connection to the GraphQL API
 const httpLink = new HttpLink({
-  // uri: 'http://localhost:3030/graphql',
-  uri: 'https://presidiumludhiana.in/graphql',
+  uri: 'http://localhost:3030/graphql',
+  // uri: 'https://presidiumludhiana.in/graphql',
 });
+
+
+const authLink = setContext((_, { headers }) => {
+  // Retrieve the token from storage (localStorage or another method)
+  // const token = localStorage.getItem('authToken');
+  // Add the token to the headers
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? ` Bearer ${token} ` : '',
+    }
+  };
+});
+
+// Combine authLink with httpLink
+const enhancedHttpLink = authLink.concat(httpLink);
+
+
 
 // Create a WebSocket client for subscriptions
-const wsClient = createClient({
-  // url: 'ws://localhost:3030/graphql',
-  url: 'wss://presidiumludhiana.in/graphql',
-});
+// WebSocket link for subscriptions
+const wsLink = new GraphQLWsLink(createClient({
+  // url: 'wss://presidiumludhiana.in/graphql',
+  url: 'ws://localhost:3030/graphql',
+  connectionParams: {
+    authToken: token, // Assuming you store the token the same way
+  },
+  reconnect: true,
+}));
 
 
 
-// Create a WebSocket link
-const wsLink = new GraphQLWsLink(wsClient);
-
-// Using split for HTTP and WebSocket links
-const link = split(
+// Split connections based on operation type
+const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
     return (
@@ -43,15 +65,51 @@ const link = split(
       definition.operation === 'subscription'
     );
   },
-  wsLink, // Use this link for subscriptions
-  httpLink, // Use this link for queries and mutations
+  wsLink, // Operations requiring subscriptions use this link
+  enhancedHttpLink  // Other operations (queries and mutations) use this link
 );
 
+
+
 // Apollo client setup
+// Initialize Apollo Client with the split link and in-memory cache
 const client = new ApolloClient({
-  link,
+  link: splitLink,
   cache: new InMemoryCache(),
 });
+
+const ACCOUNT_DETAILS = gql`
+query getWalletDetails{
+getWalletDetails {
+SK,
+coinCode
+coinName
+coinPairWith
+lastTradePrice
+coinPrice
+totalSupply
+isLiveTrade
+price
+}
+}
+`;
+
+export const fetchAllCategories = async () => {
+  try {
+    const { data } = await client.query({
+      query: ACCOUNT_DETAILS,
+      fetchPolicy: 'network-only', // Ensures the data is fetched from the server each time
+    });
+    
+    console.log('this is data',data)
+    return data;
+  } catch (error) {
+    console.error('Error fetching all categories:', error);
+    throw new Error('An error occurred while fetching all categories');
+  }
+};
+
+
 
 
 
@@ -111,9 +169,7 @@ const App = () => {
     <div>
 
       <div className=''>
-
         <h2>Limit Trade Order:</h2>
-
         <TradeForm />
       </div>
 
