@@ -5,11 +5,10 @@ import { fetchAllCategories } from '.';
 
 
 
-
 const ADD_TRADE_MUTATION = gql`
   mutation AddTrade($type: String!, $price: Int!, $quantity: Int!) {
-    addTrade(type: $type, shareName: "CCC", price: $price, quantity: $quantity, coinPairWith:"INR") {
-      id
+    addTrade(type: $type, shareName: "CCD", price: $price, quantity: $quantity, coinPairWith:"INR") {
+
       type
       shareName
       price
@@ -48,7 +47,11 @@ const TRADE_ORDER_UPDATED_SUBSCRIPTION = gql`
 const TradeForm = () => {
 
     const [tradeOrders, setTradeOrders] = useState()
-    const [walletData, setwalletData] = useState([])
+    const [walletData, setwalletData] = useState({})
+    const [wallePriceKey, setWallePriceKey] = useState(["WALLET#PENDING#PRICE_AMOUNT", "WALLET#REMAINING#PRICE_AMOUNT"])
+    const [walleCoinKey, setWalleCoinKey] = useState(["WALLET#PENDING#COIN#CCC#PAIR_WITH_INR", "WALLET#REMAINING#COIN#CCC#PAIR_WITH_INR"])
+    const [wallePriceAmount, setWallePriceAmount] = useState([])
+    const [walleCoinAmount, setWalleCoinAmount] = useState([])
 
     const [addTrade] = useMutation(ADD_TRADE_MUTATION);
     const { data: newOrderData } = useSubscription(TRADE_ORDER_UPDATED_SUBSCRIPTION);
@@ -59,9 +62,35 @@ const TradeForm = () => {
         quantity: 10,
     });
 
+    const filterData = () => {
+        walletData.forEach((vl) => {
+            let priceData = {};
+            let coinData = {};
+            console.log(vl.SK === "WALLET#PENDING#PRICE_AMOUNT")
+            if (vl.SK === "WALLET#PENDING#PRICE_AMOUNT") {
+                priceData.pendingAmount = vl.price;
+            }
+            if (vl.SK === "WALLET#REMAINING#PRICE_AMOUNT") {
+                priceData.remainingAmount = vl.price;
+            }
+            if (vl.SK === "WALLET#PENDING#COIN#CCC#PAIR_WITH_INR") {
+                coinData.pendingTotalSupply = vl.totalSupply;
+            }
+            if (vl.SK === "WALLET#REMAINING#COIN#CCC#PAIR_WITH_INR") {
+                coinData.remainingTotalSupply = vl.totalSupply;
+            }
+
+            if (Object.keys(priceData).length > 0) {
+                setWallePriceAmount(priceData);
+            }
+            if (Object.keys(coinData).length > 0) {
+                setWalleCoinAmount(coinData);
+            }
+        });
+    }
 
 
-
+    // walletData.map((vl) => vl.SK == wallePriceKey(vl.SK))
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setTradeForm(prevState => ({
@@ -73,17 +102,17 @@ const TradeForm = () => {
     const handleAddTrade = (type, price, quantity) => {
         // Perform mutation to add a new trade order
         addTrade({ variables: { type: type, price: price, quantity } });
-        fetchAllCategories().then(({ getWalletDetails }) => {
-            setwalletData(getWalletDetails)
-        })
+        // fetchAllCategories().then(({ getWalletDetails }) => {
+        //     setwalletData(getWalletDetails)
+        // })
     };
 
     useEffect(() => {
         // Handle new trade order data
-        // console.log({ newOrderData })
+        console.log({ newOrderData })
 
         const orders = newOrderData?.tradeOrderUpdated
-
+        // console.log({ orders })
         if (orders) {
             setTradeOrders(orders)
             // console.log('New trade order:', newOrderData?.tradeOrderUpdated);
@@ -93,12 +122,14 @@ const TradeForm = () => {
     }, [newOrderData]);
 
     useEffect(() => {
-        fetchAllCategories().then(({ getWalletDetails }) => {
-            setwalletData(getWalletDetails)
-        })
-    })
+        // fetchAllCategories().then(({ getWalletDetails }) => {
+        //     setwalletData(getWalletDetails)
+        // })
+        // filterData()
 
-    console.log({ walletData })
+    }, [])
+
+    // console.log({ walletData, wallePriceAmount, walleCoinAmount })
 
     return (
         <>
@@ -124,24 +155,37 @@ const TradeForm = () => {
                 </div>
 
 
-                <div className='wallet data '>
-                    <div >
-                        {walletData.map((vl, index) =>
-                            <>
-                                <div>
-                                    <div style={{ display: "flex" }}>
-                                        <div>{vl?.SK}</div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
-                                        <div><b>{vl?.price}</b></div>
-                                    </div>
-                                    <br />
-                                </div>
-                            </>
-                        )}
+                <div style={{ display: "flex" }} className='wallet data '>
+                    <div style={{ marginLeft: "8%" }}>
+                        <h2>Wallet Price </h2>
+                        <div style={{ display: "flex" }}>
+                            <div>Remaining  Price</div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
+                            <div><b>{walletData?.remaining_price?.price}</b></div>
+                        </div>
+                        <div style={{ display: "flex" }}>
+                            <div>Pending Price  </div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
+                            <div><b>{walletData?.pending_price?.price}</b></div>
+                        </div>
+
+                    </div>
+                    <div style={{ marginLeft: "8%" }}  >
+                        <h2>Wallet Coins   </h2>({walletData?.remaining_coin?.coinCode})
+                        {/* <div style={{ display: "flex" }}>
+                            <div>Coins</div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
+                            <div><b>{walletData?.remaining_coin?.coinCode}</b></div>
+                        </div>
+                        <hr /> */}
+                        <div style={{ display: "flex" }}>
+                            <div>Remaining  Supply</div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
+                            <div><b>{walletData?.remaining_coin?.totalSupply}</b></div>
+                        </div>
+                        <div style={{ display: "flex" }}>
+                            <div>Pending Supply</div>  &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;
+                            <div><b>{walletData?.pending_coin?.totalSupply}</b></div>
+                        </div>
+
                     </div>
                 </div>
-
-
-
             </div>
 
 

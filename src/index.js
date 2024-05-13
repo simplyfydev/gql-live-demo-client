@@ -16,13 +16,10 @@ import { createClient } from 'graphql-ws';
 import TradeForm from './LiveTradeOrders';
 import { setContext } from '@apollo/client/link/context';
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQSyI6IlVTRVIjMmQ0ZmFhMDAtNWM0OS00Y2Q4LWIyYzMtYjM5MDNjYTVkYjAwIiwiU0siOiJMb2dpbiNVU0VSIzJkNGZhYTAwLTVjNDktNGNkOC1iMmMzLWIzOTAzY2E1ZGIwMCIsImlhdCI6MTcxMzE2MDEwMiwiZXhwIjoxNzE1NzUyMTAyfQ.nb0fH-OsIIPAIM6Hs1UxlUDHcL9tVu4iHx7kph3QCjo"
-
-
-// HTTP connection to the GraphQL API
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQSyI6IkFkbWluI2EyNzMwMGI3LTI1ZGUtNDVjNS1iZDMzLWU1OWEyMjY2OWFhZCIsIlNLIjoiTG9naW4jQWRtaW4jYTI3MzAwYjctMjVkZS00NWM1LWJkMzMtZTU5YTIyNjY5YWFkIiwiaWF0IjoxNzE1NTkzMTAzLCJleHAiOjE3MTgxODUxMDN9.dKfzroRtXxEHcqLu6ayJCD1fV9HYlTwXiWFBysJgE48"
 const httpLink = new HttpLink({
-  uri: 'http://localhost:3030/graphql',
-  // uri: 'https://presidiumludhiana.in/graphql',
+  // uri: 'http://localhost:3030/graphql',
+  uri: 'https://presidiumludhiana.in/graphql',
 });
 
 
@@ -46,8 +43,8 @@ const enhancedHttpLink = authLink.concat(httpLink);
 // Create a WebSocket client for subscriptions
 // WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(createClient({
-  // url: 'wss://presidiumludhiana.in/graphql',
-  url: 'ws://localhost:3030/graphql',
+  url: 'wss://presidiumludhiana.in/graphql',
+  // url: 'ws://localhost:3030/graphql',
   connectionParams: {
     authToken: token, // Assuming you store the token the same way
   },
@@ -79,19 +76,41 @@ const client = new ApolloClient({
 });
 
 const ACCOUNT_DETAILS = gql`
-query getWalletDetails{
-getWalletDetails {
-SK,
-coinCode
-coinName
-coinPairWith
-lastTradePrice
-coinPrice
-totalSupply
-isLiveTrade
-price
+query getWalletDetails {
+  getWalletDetails {
+    remaining_price {
+      price
+    }
+    reserved_price {
+      price
+    }
+    pending_price {
+      price
+    }
+    remaining_coin {
+      coinCode
+      coinPairWith
+      lastTradePrice
+      coinPrice
+      totalSupply
+    }
+    reserved_coin {
+      coinCode
+      coinPairWith
+      lastTradePrice
+      coinPrice
+      totalSupply
+    }
+    pending_coin {
+      coinCode
+      coinPairWith
+      lastTradePrice
+      coinPrice
+      totalSupply
+    }
+  }
 }
-}
+
 `;
 
 export const fetchAllCategories = async () => {
@@ -100,16 +119,14 @@ export const fetchAllCategories = async () => {
       query: ACCOUNT_DETAILS,
       fetchPolicy: 'network-only', // Ensures the data is fetched from the server each time
     });
-    
-    console.log('this is data',data)
+
+    console.log('this is data', data)
     return data;
   } catch (error) {
     console.error('Error fetching all categories:', error);
     throw new Error('An error occurred while fetching all categories');
   }
 };
-
-
 
 
 
@@ -173,7 +190,7 @@ const App = () => {
         <TradeForm />
       </div>
 
-      <br />
+      {/* <br />
       <h2>Todos:</h2>
 
       <input
@@ -190,7 +207,7 @@ const App = () => {
 
       {todos.map((todo, index) => (
         <p key={index}>{todo.text}</p>
-      ))}
+      ))} */}
     </div>
   );
 };
