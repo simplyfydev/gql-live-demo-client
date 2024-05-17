@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useMutation, useSubscription, gql } from '@apollo/client';
+import { useMutation, useQuery,  useSubscription, gql } from '@apollo/client';
 import "./trade.css"
 import { fetchAllCategories } from '.';
 
@@ -8,14 +8,38 @@ import { fetchAllCategories } from '.';
 const ADD_TRADE_MUTATION = gql`
   mutation AddTrade($type: String!, $price: Int!, $quantity: Int!) {
     addTrade(type: $type, shareName: "CCD", price: $price, quantity: $quantity, coinPairWith:"INR") {
-
-      type
-      shareName
-      price
-      quantity
-      userId
-      serialNo
-      createdAt
+        buyOrders {
+            type
+            shareName
+            coinPairWith
+            price
+            quantity
+            userId
+            serialNo
+            createdAt
+            PK
+            SK
+            orderId
+            placeOrderId
+            buyerUserId
+            sellerUserId
+        }
+        tradeHistory {
+            type
+            shareName
+            coinPairWith
+            price
+            quantity
+            userId
+            serialNo
+            createdAt
+            PK
+            SK
+            orderId
+            placeOrderId
+            buyerUserId
+            sellerUserId
+        }
     }
   }
 `;
@@ -44,6 +68,61 @@ const TRADE_ORDER_UPDATED_SUBSCRIPTION = gql`
    }
 `;
 
+// GraphQL query for fetching trade orders
+const TRADE_ORDERS_QUERY = gql`
+  query tradeOrders($shareName: String!, $coinPairWith: String!) {
+    tradeOrders(shareName: $shareName, coinPairWith: $coinPairWith) {
+      buyOrders {
+        type
+        shareName
+        coinPairWith
+        price
+        quantity
+        userId
+        serialNo
+        createdAt
+        PK
+        SK
+        orderId
+        placeOrderId
+        buyerUserId
+        sellerUserId
+      }
+      sellOrders {
+        type
+        shareName
+        coinPairWith
+        price
+        quantity
+        userId
+        serialNo
+        createdAt
+        PK
+        SK
+        orderId
+        placeOrderId
+        buyerUserId
+        sellerUserId
+      }
+      tradeHistory {
+        type
+        shareName
+        coinPairWith
+        price
+        quantity
+        userId
+        serialNo
+        createdAt
+        PK
+        SK
+        buyerUserId
+        sellerUserId
+      }
+    }
+  }
+`;
+
+
 const TradeForm = () => {
 
     const [tradeOrders, setTradeOrders] = useState()
@@ -55,6 +134,9 @@ const TradeForm = () => {
 
     const [addTrade] = useMutation(ADD_TRADE_MUTATION);
     const { data: newOrderData } = useSubscription(TRADE_ORDER_UPDATED_SUBSCRIPTION);
+    const { data: tradeOrderData} = useQuery(TRADE_ORDERS_QUERY, {
+        variables: { shareName: "CCD", coinPairWith: "INR" }
+    });
     const [tradeForm, setTradeForm] = useState({
         type: '', // 'BUY' or 'SELL'
         shareName: '', // Assuming you want the user to input this as well
@@ -130,6 +212,12 @@ const TradeForm = () => {
     }, [])
 
     // console.log({ walletData, wallePriceAmount, walleCoinAmount })
+
+    useEffect(() => {
+        if (tradeOrderData) {
+            setTradeOrders(tradeOrderData.tradeOrders);
+        }
+    }, [tradeOrderData]);
 
     return (
         <>
